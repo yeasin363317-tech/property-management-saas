@@ -25,3 +25,16 @@ Report flagged 9 candidate lines. Cause: the demo password literal (code, SQL se
 
 ## Own pre-audit evidence
 33/33 SQL checks passed (isolation, payments, admin roles, tenant portal); executed against the live Supabase project in rolled-back transactions. Vitest, ESLint, Playwright and `tsc` have **not** been executed by the author.
+
+## Run #915 (v1.0.1): 85/100, rejected because of one must-fix check
+All 10 must-have requirements present. Scores: Secrets 95, Dependencies 40 (**must-fix: no lockfile**), Authorisation 95, Database rules 92, Structure 78, Build 92. Threshold 75.
+| Finding | Action |
+|---|---|
+| 2.1-2.11 No lockfile / unpinned ranges | `package-lock.json` can only be generated with network access. Template workflow `ci/lockfile.yml` generates and commits it, runs `npm audit`, typecheck, tests and build. **Open until the lockfile is in the archive.** |
+| 1.1-1.3 Demo password strength | demo buttons require >= 12 chars; `.env.example` wording fixed; `seed_demo()` already rejects < 12 chars (`database/seed.sql`, first lines of the function) |
+| 3.1 Tenant portal defense in depth | documented (ENDPOINT_AUTHORIZATION.md); RLS + RPC already filter by the caller |
+| 3.3 Maintenance UI | controls limited to assigned staff |
+| 4.1 dynamic ORDER BY in admin_list_users | not present: the function has a fixed ORDER BY and no `format('%I')`. No change. |
+| 4.2-4.5 FK indexes | added (migration 007). Note: the report names columns `user_id`/`organization_members(id)` that do not exist; the real columns are `assigned_to`, `uploaded_by`, `created_by`, `actor_id` |
+| 5.x duplication | shared password/email schemas extracted; larger refactors (splitting AuthPages, generic admin table, layout shell) deliberately deferred: not compile-checked in the authoring sandbox, so riskier than their benefit |
+| 6.1-6.3 Build docs | Node 18+ documented, setup order clarified; HowToSetup.md exists (about 2 KB) |

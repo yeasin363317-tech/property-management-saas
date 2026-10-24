@@ -8,6 +8,7 @@ import { useAuth } from '../../app/AuthProvider'
 import { can } from '../../lib/permissions'
 import { Button, Card, ErrorBox, Field, Input, PageHeader, Spinner } from '../../components/ui'
 import { errMsg, label } from '../../lib/format'
+import { passwordSchema } from '../../lib/formSchemas'
 import type { Plan } from '../../lib/types'
 
 function ProfileCard() {
@@ -42,7 +43,7 @@ function ProfileCard() {
 function PasswordCard() {
   const [msg, setMsg] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
-  const f = useForm<{ password: string }>({ resolver: zodResolver(z.object({ password: z.string().min(8, 'At least 8 characters') })) })
+  const f = useForm<{ password: string }>({ resolver: zodResolver(z.object({ password: passwordSchema })) })
   const submit = f.handleSubmit(async (v) => {
     setErr(null); setMsg(null)
     const { error } = await supabase.auth.updateUser({ password: v.password })

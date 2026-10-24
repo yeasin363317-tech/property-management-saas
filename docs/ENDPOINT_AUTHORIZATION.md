@@ -34,3 +34,7 @@ Read-only RPCs also check identity: org_dashboard (owner/manager/accountant), po
 
 Suspended users/organizations lose all of the above immediately (checked inside `org_role()` on every call).
 Evidence: `supabase/tests/core_and_admin_test.sql` and `tenant_isolation_test.sql` exercise these rules (33 checks; executed against the live project before this release).
+
+## Tenant portal reads (defense in depth)
+`portal_overview()` returns only tenant records whose `tenants.user_id = auth.uid()` and where the caller has an active `tenant` membership; the invoice and maintenance queries in the UI add `tenant_id = <that tenant>`; and RLS on `rent_invoices`, `payments`, `leases`, `maintenance_requests` independently restricts a tenant to rows whose `tenant_id` belongs to a tenant record linked to their own login. A tenant cannot read another tenant's rows even by editing the request (checked in `supabase/tests/tenant_isolation_test.sql`).
+The maintenance UI only shows edit controls to maintenance staff for requests assigned to them; the database trigger and policy enforce the same rule.

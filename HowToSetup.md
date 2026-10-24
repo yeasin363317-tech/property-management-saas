@@ -1,6 +1,6 @@
 # How to set up Rentora (step by step)
 
-You need: a free Supabase account, a free GitHub account, and a free Vercel account. No computer-only tools are required.
+You need: a free Supabase account, a free GitHub account, and a free Vercel account. For local development also Node.js 18 or later (see `.nvmrc`) and npm. Always run the database steps in the order shown.
 
 ## 1. Create the database
 1. In Supabase create a new project (any region). Wait until it is ready.

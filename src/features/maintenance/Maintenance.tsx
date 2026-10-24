@@ -86,7 +86,8 @@ function Detail({ req, onClose }: { req: Row | null; onClose: () => void }) {
     queryKey: ['maintenance-updates', req?.id], enabled: !!req,
     queryFn: async () => unwrap(await supabase.from('maintenance_updates').select('*').eq('request_id', req!.id).order('created_at')) as { id: string; comment: string | null; status_from: string | null; status_to: string | null; created_at: string }[],
   })
-  const canUpdate = !!role && (MGR.includes(role) || role === 'maintenance')
+  // Managers can always update; maintenance staff only on requests assigned to them (the database enforces this too).
+  const canUpdate = !!role && (MGR.includes(role) || (role === 'maintenance' && req?.assigned_to === session?.user.id))
   const move = useMutation({
     mutationFn: async (to: string) => unwrap(await supabase.from('maintenance_requests').update({ status: to }).eq('id', req!.id)),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['maintenance'] }); qc.invalidateQueries({ queryKey: ['maintenance-updates'] }); onClose() },

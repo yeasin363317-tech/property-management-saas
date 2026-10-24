@@ -9,6 +9,7 @@ import { useAuth } from '../../app/AuthProvider'
 import { Button, Card, ErrorBox, Field, Input } from '../../components/ui'
 import { errMsg } from '../../lib/format'
 import DemoButtons from './DemoButtons'
+import { emailSchema, passwordSchema } from '../../lib/formSchemas'
 
 function Shell({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -22,14 +23,14 @@ function Shell({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-const pw = z.string().min(8, 'At least 8 characters')
+const pw = passwordSchema
 
 export function Login() {
   const nav = useNavigate()
   const loc = useLocation()
   const { refresh } = useAuth()
   const [err, setErr] = useState<string | null>(null)
-  const f = useForm<{ email: string; password: string }>({ resolver: zodResolver(z.object({ email: z.string().email('Enter a valid email'), password: z.string().min(1, 'Enter your password') })) })
+  const f = useForm<{ email: string; password: string }>({ resolver: zodResolver(z.object({ email: emailSchema, password: z.string().min(1, 'Enter your password') })) })
   const submit = f.handleSubmit(async (v) => {
     setErr(null)
     const { error } = await supabase.auth.signInWithPassword({ email: v.email, password: v.password })
@@ -60,7 +61,7 @@ export function Signup() {
   const [sent, setSent] = useState(false)
   const nav = useNavigate()
   const { refresh } = useAuth()
-  const schema = z.object({ full_name: z.string().min(2, 'Enter your name'), email: z.string().email('Enter a valid email'), password: pw, agree: z.literal(true, { errorMap: () => ({ message: 'You must accept the terms' }) }) })
+  const schema = z.object({ full_name: z.string().min(2, 'Enter your name'), email: emailSchema, password: pw, agree: z.literal(true, { errorMap: () => ({ message: 'You must accept the terms' }) }) })
   const f = useForm<{ full_name: string; email: string; password: string; agree: boolean }>({ resolver: zodResolver(schema) })
   const submit = f.handleSubmit(async (v) => {
     setErr(null)
@@ -91,7 +92,7 @@ export function Signup() {
 export function Forgot() {
   const [done, setDone] = useState(false)
   const [err, setErr] = useState<string | null>(null)
-  const f = useForm<{ email: string }>({ resolver: zodResolver(z.object({ email: z.string().email('Enter a valid email') })) })
+  const f = useForm<{ email: string }>({ resolver: zodResolver(z.object({ email: emailSchema })) })
   const submit = f.handleSubmit(async (v) => {
     setErr(null)
     const { error } = await supabase.auth.resetPasswordForEmail(v.email, { redirectTo: window.location.origin + '/reset-password' })

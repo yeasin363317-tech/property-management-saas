@@ -13,6 +13,9 @@ and a Super Admin Panel at `/admin` (users, organizations, plans & subscriptions
 Online payments, automated billing, email delivery (invitations are shared by code), error monitoring, MFA enforcement
 (enable it in Supabase Auth), impersonation (deliberately not implemented). See `docs/AUDIT_READINESS.md`.
 
+## Prerequisites
+Node.js 18 or later (20 recommended, see `.nvmrc`) and npm 9+ for local builds; a free Supabase project; a static host such as Vercel.
+
 ## Deploy (no computer needed beyond a browser)
 1. **Supabase** — on a NEW empty project, run `database/schema.sql` once in the SQL editor (it creates everything). `supabase/migrations/` holds the same schema as ordered files for the Supabase CLI. Do not run both on the same database.
 2. **Supabase Auth settings** (Dashboard → Authentication → URL Configuration): set *Site URL* to your deployed URL and add it under *Redirect URLs*
@@ -30,6 +33,9 @@ select id, 'super_admin' from auth.users where email = 'YOUR-EMAIL@example.com';
 ```
 Then reload the app: an "Admin panel" link appears. Further admins are granted from Admin → Admin roles.
 
+## Dependencies and lockfile
+Commit `package-lock.json` (never git-ignore it) so every install resolves identical versions. Create it with `npm install`, then check with `npm audit`. Use `npm ci` in CI and on the host.
+
 ## Scripts
 `npm run dev` · `npm run build` · `npm run typecheck` · `npm run lint` · `npm test` (Vitest) · `npm run e2e` (Playwright, needs `npx playwright install`).
 
@@ -44,6 +50,7 @@ Then reload the app: an "Admin panel" link appears. Further admins are granted f
 To schedule: enable the `pg_cron` extension, then `select cron.schedule('rentora-daily', '0 2 * * *', 'select public.run_daily_job()');`.
 
 ## Demo accounts (for customers and reviewers to look around)
+Order matters: run `database/schema.sql` first (step 1 above), then `database/seed.sql`, then call `seed_demo(...)`.
 `database/seed.sql` creates two fake accounts with sample data (2 properties, 6 units, 4 tenants, leases, invoices that are paid / partial / overdue, expenses, maintenance requests):
 - Landlord: `demo.landlord@example.com`
 - Tenant portal: `demo.tenant@example.com`

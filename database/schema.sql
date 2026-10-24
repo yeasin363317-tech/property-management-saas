@@ -1,6 +1,6 @@
 -- Rentora: full database schema, creates everything from scratch on a NEW, empty Supabase project.
 -- Run this whole file once in the Supabase SQL editor. Then optionally run database/seed.sql for demo accounts.
--- Generated from supabase/migrations (001-006). Do not run the migrations AND this file on the same database.
+-- Generated from supabase/migrations (001-007). Do not run the migrations AND this file on the same database.
 
 -- ===================== 001_core_schema =====================
 create extension if not exists btree_gist with schema extensions;
@@ -1178,6 +1178,20 @@ create policy mr_insert on public.maintenance_requests for insert to authenticat
 -- ===================== 005_cleanup =====================
 -- Removes a no-op constraint that 001 originally created by mistake.
 alter table public.invoice_adjustments drop constraint if exists invoice_adjustments_no_blank;
+
+-- ===================== 007_foreign_key_indexes =====================
+create index if not exists idx_maintenance_requests_assigned_to on public.maintenance_requests (assigned_to);
+create index if not exists idx_maintenance_requests_tenant on public.maintenance_requests (tenant_id);
+create index if not exists idx_maintenance_requests_property on public.maintenance_requests (property_id);
+create index if not exists idx_documents_uploaded_by on public.documents (uploaded_by);
+create index if not exists idx_support_tickets_created_by on public.support_tickets (created_by);
+create index if not exists idx_support_tickets_assigned_to on public.support_tickets (assigned_to);
+create index if not exists idx_support_tickets_org on public.support_tickets (organization_id);
+create index if not exists idx_audit_logs_actor on public.audit_logs (actor_id);
+create index if not exists idx_leases_unit on public.leases (unit_id);
+create index if not exists idx_rent_invoices_lease on public.rent_invoices (lease_id);
+create index if not exists idx_expenses_property on public.expenses (property_id);
+create index if not exists idx_invitations_tenant on public.invitations (tenant_id);
 
 -- ===================== 006 demo guard (credentials of demo accounts cannot be changed) =====================
 create function public.is_demo_email(p_email text) returns boolean language sql immutable set search_path = '' as $$

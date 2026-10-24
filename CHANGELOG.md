@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.2
+- Added indexes on remaining foreign key columns (migration 007, also in `database/schema.sql`).
+- Demo buttons are disabled unless `VITE_DEMO_PASSWORD` has at least 12 characters (matches the database check).
+- Maintenance edit controls are shown only to managers or to the assigned maintenance staff member.
+- Shared Zod schemas in `src/lib/formSchemas.ts`.
+- Documented Node.js version (`engines`, `.nvmrc`), setup order, and the lockfile requirement.
+- Added a GitHub Actions workflow template to generate `package-lock.json`, typecheck, test and build (`ci/lockfile.yml`).
+
 ## 1.0.0
 Initial release.
 - Public site: landing, pricing from database plans, FAQ, Terms and Privacy templates.
