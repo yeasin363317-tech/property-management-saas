@@ -1,0 +1,59 @@
+name: Lockfile, audit and build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['package.json']
+
+permissions:
+  contents: write
+
+jobs:
+  lock-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate package-lock.json
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Commit lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          if git diff --cached --quiet; then
+            echo "Lockfile already up to date."
+          else
+            git commit -m "Add package-lock.json"
+            git push
+          fi
+
+      - name: Install from lockfile
+        run: npm ci
+
+      - name: Dependency audit (information)
+        run: npm audit --audit-level=high || true
+
+      - name: Typecheck
+        id: typecheck
+        run: npm run typecheck
+        continue-on-error: true
+
+      - name: Unit tests
+        id: tests
+        run: npm test
+        continue-on-error: true
+
+      - name: Build
+        run: npm run build
+
+      - name: Summary
+        run: |
+          echo "typecheck: ${{ steps.typecheck.outcome }}"
+          echo "tests: ${{ steps.tests.outcome }}"
