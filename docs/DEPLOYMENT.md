@@ -1,6 +1,6 @@
 # Deployment checklist
 - [ ] Push repo to GitHub; import in Vercel (Vite preset). `vercel.json` already rewrites all routes to index.html.
-- [ ] Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` in the host.
+- [ ] Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (and optionally `VITE_DEMO_PASSWORD`) in the host. See `HowToSetup.md` for the full guide.
 - [ ] Supabase → Auth → URL configuration: Site URL + Redirect URLs (including `/reset-password`).
 - [ ] Supabase → Auth: configure custom SMTP for production (default is heavily rate limited); consider enabling MFA for admins; review password strength settings.
 - [ ] Run `npm install && npm run build` once (locally or on the host) and fix any type errors it reports.

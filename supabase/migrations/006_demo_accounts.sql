@@ -1,17 +1,19 @@
+-- Consolidated demo migration (also contains the permission fix and the password parameter that were applied live as 007-009).
 create function public.is_demo_email(p_email text) returns boolean language sql immutable set search_path = '' as $$
   select lower(coalesce(p_email, '')) in ('demo.landlord@example.com', 'demo.tenant@example.com')
 $$;
 
 -- Demo credentials are public by design, so nobody may change them.
-create function public.block_demo_credential_change() returns trigger language plpgsql set search_path = '' as $$
+create function public.block_demo_credential_change() returns trigger language plpgsql security definer set search_path = '' as $$
 begin
-  if public.is_demo_email(old.email)
+  if lower(coalesce(old.email, '')) in ('demo.landlord@example.com', 'demo.tenant@example.com')
      and (new.encrypted_password is distinct from old.encrypted_password or new.email is distinct from old.email)
      and coalesce(current_setting('app.demo_seeding', true), '') <> 'on' then
     raise exception 'Demo account credentials cannot be changed';
   end if;
   return new;
 end $$;
+
 create trigger block_demo_credential_change before update on auth.users for each row execute function public.block_demo_credential_change();
 
 -- Demo users cannot create extra organizations (keeps the demo tidy and prevents abuse).
@@ -28,6 +30,8 @@ begin
   return v_org;
 end $$;
 
+revoke execute on function public.is_demo_email(text), public.block_demo_credential_change() from public, anon, authenticated;
+
 create function public._demo_make_user(p_email text, p_name text, p_password text) returns uuid language plpgsql security definer set search_path = '' as $$
 declare v_id uuid;
 begin
@@ -43,19 +47,22 @@ begin
   return v_id;
 end $$;
 
--- Creates (or fully resets) the demo accounts and their sample data. Run it again any time to reset the demo:
---   select public.seed_demo();
-create function public.seed_demo() returns void language plpgsql security definer set search_path = '' as $$
+-- Creates (or fully resets) the demo accounts and their sample data. Run again any time to reset the demo:
+--   select public.seed_demo('choose-a-demo-password-12+chars');
+-- Uploaded demo files must be removed via the Storage API/dashboard (SQL deletes on storage.objects are blocked).
+create function public.seed_demo(p_password text) returns void language plpgsql security definer set search_path = '' as $$
 declare
-  v_pw constant text := 'RentoraDemo#2026';
+  v_pw text := p_password;
   v_owner uuid; v_tenant uuid; v_org uuid; v_inv uuid; v_due date; v_period date; v_pay numeric;
   v_p1 uuid; v_p2 uuid; v_a1 uuid; v_a2 uuid; v_b1 uuid; v_b2 uuid; v_v1 uuid; v_v2 uuid;
   v_t1 uuid; v_t2 uuid; v_t3 uuid; v_t4 uuid; r public.leases; k int;
 begin
+  if p_password is null or length(p_password) < 12 then raise exception 'Demo password must be at least 12 characters'; end if;
   perform set_config('app.demo_seeding', 'on', true);
   v_owner := public._demo_make_user('demo.landlord@example.com', 'Demo Landlord', v_pw);
   v_tenant := public._demo_make_user('demo.tenant@example.com', 'Nusrat Jahan (demo tenant)', v_pw);
   update public.profiles set status = 'active', suspended_reason = null where id in (v_owner, v_tenant);
+  update auth.users set encrypted_password = extensions.crypt(v_pw, extensions.gen_salt('bf')) where id in (v_owner, v_tenant);
 
   select id into v_org from public.organizations where created_by = v_owner and name = 'Demo Properties (sample data)';
   if v_org is null then
@@ -71,7 +78,6 @@ begin
     delete from public.maintenance_updates where organization_id = v_org;
     delete from public.maintenance_requests where organization_id = v_org;
     delete from public.expenses where organization_id = v_org;
-    delete from storage.objects where bucket_id = 'documents' and name like v_org::text || '/%';
     delete from public.documents where organization_id = v_org;
     delete from public.leases where organization_id = v_org;
     delete from public.invitations where organization_id = v_org;
@@ -144,5 +150,4 @@ begin
     (v_org, v_owner, 'lease_expiry', 'Lease expiring soon', 'Rahim Uddin''s lease ends in about 40 days.', '/app/leases', 'demo:2');
 end $$;
 
-revoke execute on function public.is_demo_email(text), public.block_demo_credential_change(), public._demo_make_user(text, text, text), public.seed_demo() from public, anon, authenticated;
-select public.seed_demo();
+revoke execute on function public._demo_make_user(text, text, text), public.seed_demo(text) from public, anon, authenticated;

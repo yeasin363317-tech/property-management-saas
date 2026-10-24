@@ -11,4 +11,4 @@
 - Do not claim security is complete because RLS is on. Commission an independent review before real customer money/data.
 
 ## Demo accounts
-Public credentials by design (see README). Mitigations: sample data only, credentials immutable (trigger), cannot create organizations, not platform admins, free-plan limits apply, data resettable with `seed_demo()`. Residual risk: demo users can create junk/uploads until the next reset, and a published password is visible to anyone. Do not put real customer data in the demo organization.
+Fake addresses, sample data only. The password is not in the repository: it is supplied at seed time and via `VITE_DEMO_PASSWORD`, so it is shipped to browsers that load the site (that is how one-click demo login works) and is therefore effectively public. Mitigations: credentials immutable (trigger), cannot create organizations, not platform admins, free-plan limits apply, data resettable with `seed_demo()`. Residual risk: demo users can create junk or uploads until the next reset. Never put real customer data in the demo organization, and never reuse a real password as the demo password.

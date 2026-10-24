@@ -11,4 +11,4 @@
 | 9 | Audit preparation | blocked on the official Vibe 96 checklist |
 | 10 | Production readiness | open items listed in DEPLOYMENT.md |
 ## Migration plan
-001 schema → 002 functions/triggers → 003 admin RPCs, RLS, grants, seed, storage → 004 tenant portal → 005 cleanup → 006 demo accounts. Add new numbered files; never edit applied ones.
+001 schema → 002 functions/triggers → 003 admin RPCs, RLS, grants, seed, storage → 004 tenant portal → 005 cleanup → 006 demo guard + demo seed functions (consolidated). `database/schema.sql` = 001-005 + demo guard; `database/seed.sql` = demo seed functions. Add new numbered files; never edit applied ones.

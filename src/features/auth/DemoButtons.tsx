@@ -2,13 +2,15 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../app/AuthProvider'
-import { DEMO_LANDLORD, DEMO_PASSWORD, DEMO_TENANT } from '../../lib/demo'
+import { DEMO_LANDLORD, DEMO_PASSWORD, DEMO_TENANT, demoConfigured } from '../../lib/demo'
 
 export default function DemoButtons({ className = '' }: { className?: string }) {
   const nav = useNavigate()
   const { refresh } = useAuth()
   const [busy, setBusy] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
+
+  if (!demoConfigured) return null
 
   const go = async (email: string, to: string) => {
     setErr(null); setBusy(email)
