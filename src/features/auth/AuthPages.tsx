@@ -6,19 +6,32 @@ import { z } from 'zod'
 import type { ReactNode } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../app/AuthProvider'
-import { Button, Card, ErrorBox, Field, Input } from '../../components/ui'
+import { Button, ErrorBox, Field, Input } from '../../components/ui'
+import { Logo } from '../../components/Logo'
 import { errMsg } from '../../lib/format'
 import DemoButtons from './DemoButtons'
 import { emailSchema, passwordSchema } from '../../lib/formSchemas'
 
 function Shell({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="mx-auto flex min-h-full max-w-md flex-col justify-center p-4">
-      <Link to="/" className="mb-4 text-center text-xl font-bold text-brand-700">Rentora</Link>
-      <Card className="p-6">
-        <h1 className="mb-4 text-lg font-semibold">{title}</h1>
-        {children}
-      </Card>
+    <div className="flex min-h-full">
+      <aside className="hidden w-[44%] max-w-xl flex-col justify-between bg-brand-700 p-10 text-white lg:flex">
+        <Link to="/" aria-label="Rentora home"><Logo light /></Link>
+        <div>
+          <p className="text-3xl font-semibold leading-tight tracking-tight">Properties, tenants, leases and rent in one secure workspace.</p>
+          <p className="mt-3 text-brand-100">Each workspace is isolated at the database level.</p>
+        </div>
+        <p className="text-xs text-brand-200">© {new Date().getFullYear()} Rentora</p>
+      </aside>
+      <main className="flex flex-1 flex-col justify-center px-4 py-8">
+        <div className="mx-auto w-full max-w-md">
+          <Link to="/" aria-label="Rentora home" className="mb-6 flex justify-center lg:hidden"><Logo /></Link>
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card sm:p-8">
+            <h1 className="mb-5 text-2xl font-semibold tracking-tight text-slate-900">{title}</h1>
+            {children}
+          </div>
+        </div>
+      </main>
     </div>
   )
 }
@@ -47,8 +60,8 @@ export function Login() {
         <Field label="Password" error={f.formState.errors.password?.message}>{(id) => <Input id={id} type="password" autoComplete="current-password" {...f.register('password')} />}</Field>
         <Button type="submit" className="w-full" loading={f.formState.isSubmitting}>Log in</Button>
         <div className="flex justify-between text-sm">
-          <Link to="/forgot-password" className="text-brand-600 underline">Forgot password?</Link>
-          <Link to="/signup" className="text-brand-600 underline">Create account</Link>
+          <Link to="/forgot-password" className="font-medium text-brand-700 underline">Forgot password?</Link>
+          <Link to="/signup" className="font-medium text-brand-700 underline">Create account</Link>
         </div>
         <div className="border-t border-slate-200 pt-4"><p className="mb-2 text-sm font-medium text-slate-700">Just looking around?</p><DemoButtons /></div>
       </form>
@@ -69,7 +82,7 @@ export function Signup() {
     if (error) return setErr(error.message)
     if (data.session) { await refresh(); nav('/onboarding', { replace: true }) } else setSent(true)
   })
-  if (sent) return <Shell title="Check your email"><p className="text-sm text-slate-700">We sent a confirmation link to your email. Open it, then come back and <Link className="text-brand-600 underline" to="/login">log in</Link>.</p></Shell>
+  if (sent) return <Shell title="Check your email"><p className="text-sm text-slate-700" role="status">We sent a confirmation link to your email. Open it, then come back and <Link className="font-medium text-brand-700 underline" to="/login">log in</Link>.</p></Shell>
   return (
     <Shell title="Create your account">
       <form onSubmit={submit} className="space-y-4" noValidate>
@@ -78,12 +91,12 @@ export function Signup() {
         <Field label="Email" error={f.formState.errors.email?.message}>{(id) => <Input id={id} type="email" autoComplete="email" {...f.register('email')} />}</Field>
         <Field label="Password" hint="At least 8 characters" error={f.formState.errors.password?.message}>{(id) => <Input id={id} type="password" autoComplete="new-password" {...f.register('password')} />}</Field>
         <label className="flex items-start gap-2 text-sm text-slate-700">
-          <input type="checkbox" className="mt-1" {...f.register('agree')} />
-          <span>I agree to the <Link to="/terms" target="_blank" className="text-brand-600 underline">Terms</Link> and <Link to="/privacy" target="_blank" className="text-brand-600 underline">Privacy Policy</Link></span>
+          <input type="checkbox" className="mt-1 h-4 w-4 rounded border-slate-300" {...f.register('agree')} />
+          <span>I agree to the <Link to="/terms" target="_blank" className="font-medium text-brand-700 underline">Terms</Link> and <Link to="/privacy" target="_blank" className="font-medium text-brand-700 underline">Privacy Policy</Link></span>
         </label>
-        {f.formState.errors.agree && <p role="alert" className="text-xs text-red-600">{f.formState.errors.agree.message}</p>}
+        {f.formState.errors.agree && <p role="alert" className="text-xs font-medium text-red-700">{f.formState.errors.agree.message}</p>}
         <Button type="submit" className="w-full" loading={f.formState.isSubmitting}>Sign up</Button>
-        <p className="text-center text-sm">Already have an account? <Link to="/login" className="text-brand-600 underline">Log in</Link></p>
+        <p className="text-center text-sm">Already have an account? <Link to="/login" className="font-medium text-brand-700 underline">Log in</Link></p>
       </form>
     </Shell>
   )
@@ -107,7 +120,7 @@ export function Forgot() {
           <Button type="submit" className="w-full" loading={f.formState.isSubmitting}>Send reset link</Button>
         </form>
       )}
-      <p className="mt-4 text-center text-sm"><Link to="/login" className="text-brand-600 underline">Back to log in</Link></p>
+      <p className="mt-4 text-center text-sm"><Link to="/login" className="font-medium text-brand-700 underline">Back to log in</Link></p>
     </Shell>
   )
 }

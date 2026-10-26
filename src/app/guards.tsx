@@ -1,7 +1,7 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useAuth } from './AuthProvider'
-import { Spinner, Card } from '../components/ui'
+import { Spinner, Card, PermissionDenied } from '../components/ui'
 import type { OrgRole, PlatformRole } from '../lib/types'
 
 function Full({ children }: { children: ReactNode }) {
@@ -38,14 +38,20 @@ export function RequireOrg() {
 export function RequireRole({ roles, children }: { roles: OrgRole[]; children: ReactNode }) {
   const { role } = useAuth()
   if (!role || !roles.includes(role)) {
-    return <Card><h1 className="font-semibold">No access</h1><p className="mt-1 text-sm text-slate-600">Your role does not have access to this page.</p></Card>
+    return <PermissionDenied message="Your role in this workspace does not include this page." action={<Link to="/app" className="text-sm font-medium text-brand-700 underline">Back to dashboard</Link>} />
   }
   return <>{children}</>
 }
 
 /** UI guard only. Every admin RPC/table re-checks the platform role in the database. */
 export function RequireAdmin({ roles }: { roles?: PlatformRole[] }) {
-  const { platformRole } = useAuth()
-  if (!platformRole || (roles && !roles.includes(platformRole))) return <Navigate to="/app" replace />
+  const { platformRole, loading, session } = useAuth()
+  const loc = useLocation()
+  // Wait for the session and platform role to resolve so privileged screens never flash.
+  if (loading) return <Spinner label="Checking access" />
+  if (!session) return <Navigate to="/login" state={{ from: loc.pathname }} replace />
+  if (!platformRole || (roles && !roles.includes(platformRole))) {
+    return <div className="p-4 pt-16"><PermissionDenied title="Admin access required" message="This area is only for Rentora platform administrators." action={<Link to="/app" className="text-sm font-medium text-brand-700 underline">Back to workspace</Link>} /></div>
+  }
   return <Outlet />
 }

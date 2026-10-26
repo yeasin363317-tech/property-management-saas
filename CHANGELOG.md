@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 (UI redesign, not yet built or tested)
+- New design tokens (Tailwind config), Rentora logo component, inline icon set, restyled shared components (buttons, inputs, cards, badges, tables, modals with focus trap, skeleton, permission-denied view).
+- New app shell: responsive sidebar drawer, top bar, breadcrumbs, skip link, icons for every existing nav item.
+- Premium landing page with dashboard illustration, five feature visuals, benefits, how-it-works, FAQ, final CTA.
+- Split-layout auth pages; tenant portal header restyled.
+- `/admin/*` guard now waits for the session and shows a 403 page instead of silently redirecting.
+- No database, RLS, RPC or business-logic changes.
+
 ## 1.0.2
 - Added indexes on remaining foreign key columns (migration 007, also in `database/schema.sql`).
 - Demo buttons are disabled unless `VITE_DEMO_PASSWORD` has at least 12 characters (matches the database check).

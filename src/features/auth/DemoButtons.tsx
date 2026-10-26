@@ -23,15 +23,15 @@ export default function DemoButtons({ className = '' }: { className?: string }) 
   return (
     <div className={className}>
       <div className="flex flex-wrap gap-2">
-        <button disabled={!!busy} onClick={() => go(DEMO_LANDLORD, '/app')} className="rounded-md border border-brand-600 px-4 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50 disabled:opacity-50">
+        <button disabled={!!busy} onClick={() => go(DEMO_LANDLORD, '/app')} className="min-h-[44px] rounded-lg border border-brand-600 bg-white px-4 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50 disabled:opacity-50">
           {busy === DEMO_LANDLORD ? 'Opening demo...' : 'Try demo as landlord'}
         </button>
-        <button disabled={!!busy} onClick={() => go(DEMO_TENANT, '/portal')} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+        <button disabled={!!busy} onClick={() => go(DEMO_TENANT, '/portal')} className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50">
           {busy === DEMO_TENANT ? 'Opening demo...' : 'Try demo as tenant'}
         </button>
       </div>
       <p className="mt-2 text-xs text-slate-500">No signup needed. Sample data only; it is reset from time to time.</p>
-      {err && <p role="alert" className="mt-1 text-xs text-red-600">{err}</p>}
+      {err && <p role="alert" className="mt-1 text-xs font-medium text-red-700">{err}</p>}
     </div>
   )
 }

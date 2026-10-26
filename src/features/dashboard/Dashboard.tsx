@@ -32,9 +32,9 @@ export default function Dashboard() {
         title="Dashboard"
         subtitle="Invoiced = rent billed with a due date in range. Collected = valid payments received in range. Outstanding = unpaid balance on all open invoices."
         actions={
-          <div className="flex items-end gap-2">
-            <label className="text-xs text-slate-600">From<Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></label>
-            <label className="text-xs text-slate-600">To<Input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></label>
+          <div className="flex flex-wrap items-end gap-2">
+            <label className="text-xs font-medium text-slate-600">From<Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></label>
+            <label className="text-xs font-medium text-slate-600">To<Input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></label>
           </div>
         }
       />
@@ -60,14 +60,14 @@ export default function Dashboard() {
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={d.trend}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="invoiced" fill="#94a3b8" name="Invoiced" />
-                  <Bar dataKey="collected" fill="#2563eb" name="Collected" />
-                  <Bar dataKey="expenses" fill="#f59e0b" name="Expenses" />
+                  <Bar dataKey="invoiced" fill="#94a3b8" radius={[4, 4, 0, 0]} name="Invoiced" />
+                  <Bar dataKey="collected" fill="#2563eb" radius={[4, 4, 0, 0]} name="Collected" />
+                  <Bar dataKey="expenses" fill="#b45309" radius={[4, 4, 0, 0]} name="Expenses" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

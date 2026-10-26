@@ -6,6 +6,7 @@ import { useAuth } from '../../app/AuthProvider'
 import { Badge, Button, Card, Empty, ErrorBox, Field, Input, Select, Spinner, Td, TableWrap, Textarea, Th, statusTone } from '../../components/ui'
 import { errMsg, fmtDate, invoiceDisplayStatus, label, money, outstanding } from '../../lib/format'
 import type { Invoice, MaintenanceRequest } from '../../lib/types'
+import { Logo } from '../../components/Logo'
 
 interface Overview {
   tenant_id: string; organization_id: string; tenant_name: string; organization_name: string; currency: string
@@ -34,11 +35,11 @@ export default function Portal() {
 
   const isTenantOnly = memberships.every((m) => m.role === 'tenant')
   return (
-    <div className="mx-auto max-w-4xl space-y-5 p-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-brand-700">Rentora tenant portal</h1>
-        <div className="space-x-3 text-sm">{!isTenantOnly && <Link className="text-brand-600 underline" to="/app">Workspace</Link>}<button className="text-slate-600 underline" onClick={() => signOut()}>Sign out</button></div>
-      </div>
+    <div className="mx-auto max-w-4xl space-y-5 p-4 md:p-6">
+      <header className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-card">
+        <div className="flex items-center gap-3"><Logo size={28} /><h1 className="text-base font-semibold text-slate-700">Tenant portal</h1></div>
+        <div className="flex items-center gap-3 text-sm">{!isTenantOnly && <Link className="font-medium text-brand-700 underline" to="/app">Workspace</Link>}<button className="min-h-[40px] rounded-lg border border-slate-300 px-3 font-medium text-slate-700 hover:bg-slate-50" onClick={() => signOut()}>Sign out</button></div>
+      </header>
       {!tenantPortalEnabled && <ErrorBox error="The tenant portal is currently switched off by the platform." />}
       {ov.isLoading && <Spinner />}
       {ov.error && <ErrorBox error={ov.error} onRetry={() => ov.refetch()} />}

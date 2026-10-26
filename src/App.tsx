@@ -1,8 +1,9 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Link, Route, Routes } from 'react-router-dom'
 import { envOk } from './lib/supabase'
 import { RequireAdmin, RequireAuth, RequireOrg, RequireRole } from './app/guards'
 import { AdminLayout, AppLayout } from './app/layouts'
 import { FIN } from './lib/permissions'
+import { Logo } from './components/Logo'
 import Landing from './features/public/Landing'
 import { Terms, Privacy } from './features/public/Legal'
 import { Login, Signup, Forgot, ResetPassword } from './features/auth/AuthPages'
@@ -30,6 +31,18 @@ import AdminTickets from './features/admin/AdminTickets'
 import AdminOps from './features/admin/AdminOps'
 import AdminAdmins from './features/admin/AdminAdmins'
 import AdminAudit from './features/admin/AdminAudit'
+
+function NotFound() {
+  return (
+    <div className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-3 p-6 text-center">
+      <Logo />
+      <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-brand-700">Error 404</p>
+      <h1 className="text-2xl font-semibold tracking-tight">Page not found</h1>
+      <p className="text-sm text-slate-600">The page you are looking for does not exist or has moved.</p>
+      <Link to="/" className="mt-2 inline-flex min-h-[40px] items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">Go to home page</Link>
+    </div>
+  )
+}
 
 function SetupNeeded() {
   return (
@@ -93,7 +106,7 @@ export default function App() {
           </Route>
         </Route>
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
