@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../app/AuthProvider'
 import { Button, ErrorBox, Field, Input } from '../../components/ui'
 import { Logo } from '../../components/Logo'
+import { getPendingInvite, isInviteToken, setPendingInvite } from '../../lib/invite'
 import { errMsg } from '../../lib/format'
 import DemoButtons from './DemoButtons'
 import { emailSchema, passwordSchema } from '../../lib/formSchemas'
@@ -38,23 +39,35 @@ function Shell({ title, children }: { title: string; children: ReactNode }) {
 
 const pw = passwordSchema
 
+/** Reads ?invite=<code>&email=<address> from an invitation link and remembers the code. */
+function useInviteParams() {
+  const [sp] = useSearchParams()
+  const code = sp.get('invite') ?? ''
+  const email = sp.get('email') ?? ''
+  if (code && isInviteToken(code)) setPendingInvite(code.trim())
+  return { invited: !!code && isInviteToken(code), email }
+}
+
 export function Login() {
   const nav = useNavigate()
   const loc = useLocation()
   const { refresh } = useAuth()
+  const { invited, email: invEmail } = useInviteParams()
   const [err, setErr] = useState<string | null>(null)
-  const f = useForm<{ email: string; password: string }>({ resolver: zodResolver(z.object({ email: emailSchema, password: z.string().min(1, 'Enter your password') })) })
+  const f = useForm<{ email: string; password: string }>({ defaultValues: { email: invEmail }, resolver: zodResolver(z.object({ email: emailSchema, password: z.string().min(1, 'Enter your password') })) })
   const submit = f.handleSubmit(async (v) => {
     setErr(null)
     const { error } = await supabase.auth.signInWithPassword({ email: v.email, password: v.password })
     if (error) return setErr(error.message === 'Invalid login credentials' ? 'Wrong email or password.' : error.message)
     await refresh()
     const from = (loc.state as { from?: string } | null)?.from
-    nav(from && from !== '/login' ? from : '/app', { replace: true })
+    // A pending invitation must be accepted first; otherwise RequireOrg routes tenants to /portal.
+    nav(getPendingInvite() ? '/onboarding' : from && from !== '/login' ? from : '/app', { replace: true })
   })
   return (
     <Shell title="Log in">
       <form onSubmit={submit} className="space-y-4" noValidate>
+        {invited && <p role="status" className="rounded-lg bg-brand-50 p-3 text-sm text-brand-800">You have an invitation. Log in with the invited email to accept it.</p>}
         {err && <ErrorBox error={err} />}
         <Field label="Email" error={f.formState.errors.email?.message}>{(id) => <Input id={id} type="email" autoComplete="email" {...f.register('email')} />}</Field>
         <Field label="Password" error={f.formState.errors.password?.message}>{(id) => <Input id={id} type="password" autoComplete="current-password" {...f.register('password')} />}</Field>
@@ -74,8 +87,9 @@ export function Signup() {
   const [sent, setSent] = useState(false)
   const nav = useNavigate()
   const { refresh } = useAuth()
+  const { invited, email: invEmail } = useInviteParams()
   const schema = z.object({ full_name: z.string().min(2, 'Enter your name'), email: emailSchema, password: pw, agree: z.literal(true, { errorMap: () => ({ message: 'You must accept the terms' }) }) })
-  const f = useForm<{ full_name: string; email: string; password: string; agree: boolean }>({ resolver: zodResolver(schema) })
+  const f = useForm<{ full_name: string; email: string; password: string; agree: boolean }>({ defaultValues: { email: invEmail }, resolver: zodResolver(schema) })
   const submit = f.handleSubmit(async (v) => {
     setErr(null)
     const { data, error } = await supabase.auth.signUp({ email: v.email, password: v.password, options: { data: { full_name: v.full_name }, emailRedirectTo: window.location.origin + '/login' } })
@@ -86,6 +100,7 @@ export function Signup() {
   return (
     <Shell title="Create your account">
       <form onSubmit={submit} className="space-y-4" noValidate>
+        {invited && <p role="status" className="rounded-lg bg-brand-50 p-3 text-sm text-brand-800">You have been invited. Sign up with the invited email address and your invitation will be accepted automatically.</p>}
         {err && <ErrorBox error={err} />}
         <Field label="Full name" error={f.formState.errors.full_name?.message}>{(id) => <Input id={id} autoComplete="name" {...f.register('full_name')} />}</Field>
         <Field label="Email" error={f.formState.errors.email?.message}>{(id) => <Input id={id} type="email" autoComplete="email" {...f.register('email')} />}</Field>

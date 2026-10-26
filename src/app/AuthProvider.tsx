@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session, loading, profile, memberships, org, role, platformRole, tenantPortalEnabled,
     setOrgId: (id) => { setOrgIdState(id); try { localStorage.setItem(ORG_KEY, id) } catch { /* storage unavailable */ } },
     refresh: async () => { const { data } = await supabase.auth.getSession(); await load(data.session) },
-    signOut: async () => { await supabase.auth.signOut(); setMemberships([]); setProfile(null); setPlatformRole(null) },
+    signOut: async () => { await supabase.auth.signOut(); setMemberships([]); setProfile(null); setPlatformRole(null); setOrgIdState(null); try { localStorage.removeItem(ORG_KEY) } catch { /* storage unavailable */ } },
   }
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

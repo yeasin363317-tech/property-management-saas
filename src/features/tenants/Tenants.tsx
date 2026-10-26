@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -125,7 +126,7 @@ export default function Tenants() {
                   <Td className="font-medium">{t.full_name}</Td>
                   <Td>{t.email ?? '-'}<br /><span className="text-slate-500">{t.phone ?? ''}</span></Td>
                   <Td><Badge tone={statusTone(t.status)}>{label(t.status)}</Badge></Td>
-                  <Td>{t.user_id ? <Badge tone="green">Linked</Badge> : <span className="text-slate-400">Not invited</span>}</Td>
+                  <Td>{t.user_id ? <Badge tone="green">Linked</Badge> : <span className="text-slate-500">Not invited{role === 'owner' && <> · <Link className="font-medium text-brand-700 underline" to={`/app/team?tenant=${t.id}${t.email ? `&email=${encodeURIComponent(t.email)}` : ''}`}>Invite</Link></>}</span>}</Td>
                   <Td className="text-right"><span className="space-x-2">
                     <button className="text-slate-600 hover:underline" onClick={() => setHist(t)}>Leases</button>
                     {manage && <button className="text-brand-600 hover:underline" onClick={() => { setEdit(t); setOpen(true) }}>Edit</button>}

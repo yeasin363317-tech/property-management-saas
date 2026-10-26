@@ -10,7 +10,7 @@ private documents, in-app notifications, reports with CSV export, team invitatio
 and a Super Admin Panel at `/admin` (users, organizations, plans & subscriptions, tickets, flags, jobs, admin roles, audit log).
 
 ## Not built / not claimed
-Online payments, automated billing, email delivery (invitations are shared by code), error monitoring, MFA enforcement
+Online payments, automated billing, email delivery (invitations are shared by link or code), error monitoring, MFA enforcement
 (enable it in Supabase Auth), impersonation (deliberately not implemented). See `docs/AUDIT_READINESS.md`.
 
 ## Prerequisites

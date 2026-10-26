@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1 (bug fixes, not yet built or tested)
+- Fixed: tenants ended up as landlords because every new user saw "Create your workspace". Onboarding now shows the invitation code first and says the workspace form is for landlords only.
+- Fixed: invitation codes never reached tenants. Team page now creates a ready-to-send invitation link (copy link, copy message, WhatsApp, email app). The link opens Sign up with the email pre-filled and the code is accepted automatically after sign up and login.
+- Tenants page has an Invite link for owners; invite role now defaults to Tenant and shows what each role can see.
+- Remembered workspace is cleared on sign out so one user's workspace is never reused for the next login.
+- Still true: Rentora does not send emails by itself. The landlord shares the link.
+
 ## 1.1.0 (UI redesign, not yet built or tested)
 - New design tokens (Tailwind config), Rentora logo component, inline icon set, restyled shared components (buttons, inputs, cards, badges, tables, modals with focus trap, skeleton, permission-denied view).
 - New app shell: responsive sidebar drawer, top bar, breadcrumbs, skip link, icons for every existing nav item.
