@@ -37,4 +37,4 @@ All 10 must-have requirements present. Scores: Secrets 95, Dependencies 40 (**mu
 | 4.1 dynamic ORDER BY in admin_list_users | not present: the function has a fixed ORDER BY and no `format('%I')`. No change. |
 | 4.2-4.5 FK indexes | added (migration 007). Note: the report names columns `user_id`/`organization_members(id)` that do not exist; the real columns are `assigned_to`, `uploaded_by`, `created_by`, `actor_id` |
 | 5.x duplication | shared password/email schemas extracted; larger refactors (splitting AuthPages, generic admin table, layout shell) deliberately deferred: not compile-checked in the authoring sandbox, so riskier than their benefit |
-| 6.1-6.3 Build docs | Node 18+ documented, setup order clarified; HowToSetup.md exists (about 2 KB) |
+| 6.1-6.3 Build docs | Node 20 documented, setup order clarified; HowToSetup.md exists (about 2 KB) |

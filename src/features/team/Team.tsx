@@ -44,7 +44,7 @@ export default function Team() {
     queryFn: async () => unwrap(await supabase.from('invitations').select('id, email, role, token, status, expires_at').eq('organization_id', org!.id).eq('status', 'pending').order('created_at', { ascending: false })) as Invite[],
   })
   const tenants = useQuery({
-    queryKey: ['invite-tenants', org?.id], enabled: !!org && role === 'tenant',
+    queryKey: ['invite-tenants', org?.id], enabled: !!org,
     queryFn: async () => unwrap(await supabase.from('tenants').select('id, full_name, email').eq('organization_id', org!.id).is('user_id', null).neq('status', 'archived').order('full_name')) as { id: string; full_name: string; email: string | null }[],
   })
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -25,6 +26,10 @@ export default function Onboarding() {
   const tried = useRef(false)
   const [invErr, setInvErr] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const mine = useQuery({
+    queryKey: ['my-invitations'],
+    queryFn: async () => { const r = await supabase.rpc('my_pending_invitations'); if (r.error) throw new Error(r.error.message); return (r.data ?? []) as { token: string; role: string; organization_name: string }[] },
+  })
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Dhaka'
   const f = useForm<V>({ resolver: zodResolver(schema), defaultValues: { name: '', currency: 'BDT', timezone: tz } })
 
@@ -61,6 +66,19 @@ export default function Onboarding() {
     <div className="mx-auto max-w-md space-y-4 p-4 pt-10">
       <h1 className="text-2xl font-bold">Welcome to Rentora</h1>
       {(busy || pending) && <p role="status" className="rounded-lg bg-brand-50 p-3 text-sm text-brand-800">{busy ? 'Accepting your invitation...' : 'You have an invitation. Accept it below.'}</p>}
+      {mine.data && mine.data.length > 0 && (
+        <Card>
+          <h2 className="font-semibold">Invitations for your email</h2>
+          <ul className="mt-2 space-y-2">
+            {mine.data.map((i) => (
+              <li key={i.token} className="flex items-center justify-between gap-2 rounded border border-slate-200 p-2 text-sm">
+                <span>{i.organization_name} · {i.role.replace('_', ' ')}</span>
+                <Button loading={busy} onClick={() => accept(i.token)}>Accept</Button>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
       <Card>
         <h2 className="font-semibold">Have an invitation?</h2>
         <p className="mt-1 text-sm text-slate-600">Tenants and team members: paste the invitation code you were given. Sign up with the same email the invitation was sent to.</p>

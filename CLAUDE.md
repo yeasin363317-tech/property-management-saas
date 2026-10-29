@@ -7,3 +7,15 @@
 - Admin actions go through `admin_*` RPCs, which check the platform role, require a reason and write `audit_logs`.
 - Never claim a test passed unless it was run. Never claim "Vibe 96 approved". Do not invent audit requirements.
 - Keep `docs/` consistent with code when decisions change.
+
+
+## Folder layout
+- `src/app/` auth provider, route guards, layouts
+- `src/features/<name>/` one folder per feature (properties, tenants, leases, rent, maintenance, portal, admin, auth ...)
+- `src/components/` shared UI
+- `src/lib/` supabase client, formatting, permissions, schemas, invitations
+- `supabase/migrations/` ordered SQL (001-009); `database/` single-file schema and seed for the SQL-editor setup path
+- `docs/` authorization, RLS matrix, operations; `e2e/` Playwright; `src/test/` Vitest
+
+## Commands
+`npm ci` · `npm run dev` · `npm run typecheck` · `npm run lint` · `npm test` · `npm run build` · `npm run e2e`

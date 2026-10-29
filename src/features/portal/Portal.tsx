@@ -21,15 +21,17 @@ export default function Portal() {
   const [priority, setPriority] = useState('medium')
   const [err, setErr] = useState<string | null>(null)
 
-  const ov = useQuery({ queryKey: ['portal'], queryFn: async () => unwrap(await supabase.rpc('portal_overview')) as Overview[] })
-  const t = ov.data?.[0]
-  const inv = useQuery({ queryKey: ['portal-invoices', t?.tenant_id], enabled: !!t, queryFn: async () => unwrap(await supabase.from('rent_invoices').select('*').eq('tenant_id', t!.tenant_id).order('due_date', { ascending: false })) as Invoice[] })
-  const reqs = useQuery({ queryKey: ['portal-requests', t?.tenant_id], enabled: !!t, queryFn: async () => unwrap(await supabase.from('maintenance_requests').select('*').eq('tenant_id', t!.tenant_id).order('created_at', { ascending: false })) as MaintenanceRequest[] })
+  const uid = session?.user.id
+  const [idx, setIdx] = useState(0)
+  const ov = useQuery({ queryKey: ['portal', uid], queryFn: async () => unwrap(await supabase.rpc('portal_overview')) as Overview[] })
+  const t = ov.data?.[Math.min(idx, Math.max(0, (ov.data?.length ?? 1) - 1))]
+  const inv = useQuery({ queryKey: ['portal-invoices', uid, t?.tenant_id], enabled: !!t, queryFn: async () => unwrap(await supabase.from('rent_invoices').select('*').eq('tenant_id', t!.tenant_id).order('due_date', { ascending: false })) as Invoice[] })
+  const reqs = useQuery({ queryKey: ['portal-requests', uid, t?.tenant_id], enabled: !!t, queryFn: async () => unwrap(await supabase.from('maintenance_requests').select('*').eq('tenant_id', t!.tenant_id).order('created_at', { ascending: false })) as MaintenanceRequest[] })
   const activeLease = t?.leases.find((l) => l.status === 'active')
 
   const create = useMutation({
     mutationFn: async () => unwrap(await supabase.from('maintenance_requests').insert({ organization_id: t!.organization_id, property_id: activeLease!.property_id, unit_id: activeLease!.unit_id, tenant_id: t!.tenant_id, title, description: desc || null, priority, status: 'new', created_by: session!.user.id })),
-    onSuccess: () => { setTitle(''); setDesc(''); qc.invalidateQueries({ queryKey: ['portal-requests'] }) },
+    onSuccess: () => { setTitle(''); setDesc(''); qc.invalidateQueries({ queryKey: ['portal-requests', uid] }) },
     onError: (e) => setErr(errMsg(e)),
   })
 
@@ -47,6 +49,9 @@ export default function Portal() {
       {t && (
         <>
           <p className="text-sm text-slate-600">Welcome, {t.tenant_name} · {t.organization_name}</p>
+          {ov.data && ov.data.length > 1 && (
+            <Field label="Tenancy">{(id) => <Select id={id} value={idx} onChange={(e) => setIdx(Number(e.target.value))}>{ov.data!.map((o, n) => <option key={o.tenant_id} value={n}>{o.organization_name}</option>)}</Select>}</Field>
+          )}
           <Card>
             <h2 className="font-semibold">My lease</h2>
             {t.leases.length === 0 && <p className="mt-1 text-sm text-slate-500">No lease on file.</p>}

@@ -14,7 +14,7 @@ Online payments, automated billing, email delivery (invitations are shared by li
 (enable it in Supabase Auth), impersonation (deliberately not implemented). See `docs/AUDIT_READINESS.md`.
 
 ## Prerequisites
-Node.js 18 or later (20 recommended, see `.nvmrc`) and npm 9+ for local builds; a free Supabase project; a static host such as Vercel.
+Node.js 20 (exact version in `.nvmrc`) and npm 9+ for local builds; a free Supabase project; a static host such as Vercel.
 
 ## Deploy (no computer needed beyond a browser)
 1. **Supabase** — on a NEW empty project, run `database/schema.sql` once in the SQL editor (it creates everything). `supabase/migrations/` holds the same schema as ordered files for the Supabase CLI. Do not run both on the same database.

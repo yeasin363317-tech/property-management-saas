@@ -1,5 +1,4 @@
 import { Link, Route, Routes } from 'react-router-dom'
-import { envOk } from './lib/supabase'
 import { RequireAdmin, RequireAuth, RequireOrg, RequireRole } from './app/guards'
 import { AdminLayout, AppLayout } from './app/layouts'
 import { FIN } from './lib/permissions'
@@ -44,26 +43,14 @@ function NotFound() {
   )
 }
 
-function SetupNeeded() {
-  return (
-    <div className="mx-auto max-w-lg p-8">
-      <h1 className="text-xl font-semibold">Setup needed</h1>
-      <p className="mt-2 text-sm text-slate-700">
-        This app is missing its Supabase settings. In your hosting dashboard (for example Vercel → Settings → Environment Variables) add{' '}
-        <code className="rounded bg-slate-100 px-1">VITE_SUPABASE_URL</code> and <code className="rounded bg-slate-100 px-1">VITE_SUPABASE_ANON_KEY</code>, then redeploy.
-      </p>
-    </div>
-  )
-}
-
 export default function App() {
-  if (!envOk) return <SetupNeeded />
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<Login kind="landlord" />} />
+      <Route path="/tenant-login" element={<Login kind="tenant" />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<Forgot />} />
       <Route path="/reset-password" element={<ResetPassword />} />

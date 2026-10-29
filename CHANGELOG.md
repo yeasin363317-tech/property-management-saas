@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.3
+- Separate landlord (/login) and tenant (/tenant-login) sign-in with account-type checks.
+- Existing accounts now see pending invitations for their own email on onboarding (migration 008, my_pending_invitations RPC); no code paste needed.
+- Removed committed tsconfig.tsbuildinfo.
+- Migration 009 adds an index for every foreign key that lacked one.
+- CI replaced by one workflow (.github/workflows/ci.yml: npm ci, npm audit on production tree, typecheck, lint, test, build); removed the unused ci/ copy and the unzip workflow.
+- Node requirement raised to >=20 (Node 18 is end of life).
+- Auth loading no longer treats a failed membership query as 'no workspaces'.
+- Dashboard numbers refresh after every successful write (RENT-F-001); all cached data is cleared on sign-out or when a different user signs in, and tenant portal query keys include the user id (RENT-F-004).
+- A failed account load shows a retry message instead of sending the user to onboarding (RENT-F-002).
+- Tenant portal lets a tenant with several tenancies switch between them (RENT-F-003).
+- New tests: src/test/queryClient.test.ts and e2e/crud.spec.ts (e2e needs E2E_* credentials for a disposable project).
+- Added LICENSE-NOTE.md, folder layout and commands in CLAUDE.md, local-run and branding sections in HowToSetup.md.
+
 ## 1.1.1 (bug fixes, not yet built or tested)
 - Fixed: tenants ended up as landlords because every new user saw "Create your workspace". Onboarding now shows the invitation code first and says the workspace form is for landlords only.
 - Fixed: invitation codes never reached tenants. Team page now creates a ready-to-send invitation link (copy link, copy message, WhatsApp, email app). The link opens Sign up with the email pre-filled and the code is accepted automatically after sign up and login.

@@ -1,6 +1,6 @@
 # How to set up Rentora (step by step)
 
-You need: a free Supabase account, a free GitHub account, and a free Vercel account. For local development also Node.js 18 or later (see `.nvmrc`) and npm. Always run the database steps in the order shown.
+You need: a free Supabase account, a free GitHub account, and a free Vercel account. For local development also Node.js 20 (exact version in `.nvmrc`) (see `.nvmrc`) and npm. Always run the database steps in the order shown.
 
 ## 1. Create the database
 1. In Supabase create a new project (any region). Wait until it is ready.
@@ -27,6 +27,24 @@ select id, 'super_admin' from auth.users where email = 'YOUR-EMAIL';
 ```
 Reload the site: an **Admin panel** link appears.
 
-## 6. Check it works
+## 6. Environment variables
+| Variable | Required | Purpose |
+|---|---|---|
+| `VITE_SUPABASE_URL` | yes | Your Supabase Project URL. The app shows a setup screen without it. |
+| `VITE_SUPABASE_ANON_KEY` | yes | Public publishable/anon key. Never the service_role key. |
+| `VITE_DEMO_PASSWORD` | optional | Password you passed to `seed_demo()`. It is public in the browser bundle, so use a throwaway password used nowhere else. |
+
+## 7. Run locally with the Supabase CLI
+1. Install Node 20 (`.nvmrc`) and the Supabase CLI.
+2. `supabase start` (needs Docker). It applies `supabase/migrations/001-009` automatically. Do not also run `database/schema.sql` on the same database.
+3. Copy `.env.example` to `.env` and put the local URL and anon key printed by `supabase start`.
+4. `npm ci` then `npm run dev`.
+
+## 8. Change the branding
+- Name and logo: `src/components/Logo.tsx`, the `<title>` in `index.html`, and `public/` icons.
+- Colors: the `brand` palette in `tailwind.config.js`.
+- Texts on the landing page: `src/features/public/`.
+
+## 9. Check it works
 Sign up → create workspace → add property → add unit → add tenant → create lease → Rent & payments → Generate invoices → record a payment.
 More detail: `docs/DEPLOYMENT.md`, `docs/OPERATIONS_AND_BACKUP.md`.

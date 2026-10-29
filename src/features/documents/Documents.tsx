@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase, unwrap } from '../../lib/supabase'
 import { useAuth } from '../../app/AuthProvider'
 import { can } from '../../lib/permissions'
-import { Button, Card, ConfirmDialog, Empty, ErrorBox, Field, PageHeader, Select, Spinner, Td, TableWrap, Th } from '../../components/ui'
+import { Card, ConfirmDialog, Empty, ErrorBox, Field, PageHeader, Select, Spinner, Td, TableWrap, Th } from '../../components/ui'
 import { errMsg, fmtDate, label } from '../../lib/format'
 import type { DocumentRow } from '../../lib/types'
 

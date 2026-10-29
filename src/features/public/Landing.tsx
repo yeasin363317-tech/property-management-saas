@@ -150,7 +150,8 @@ export default function Landing() {
             <a href="#faq" className="hidden px-2 text-slate-600 hover:text-slate-900 md:inline">FAQ</a>
             {session ? <Link to="/app" className={btnP}>Open app</Link> : (
               <>
-                <Link to="/login" className="px-3 py-2 font-medium text-slate-700 hover:text-slate-900">Log in</Link>
+                <Link to="/login" className="px-3 py-2 font-medium text-slate-700 hover:text-slate-900">Landlord login</Link>
+                <Link to="/tenant-login" className="px-3 py-2 font-medium text-slate-700 hover:text-slate-900">Tenant login</Link>
                 <Link to="/signup" className={btnP}>Sign up</Link>
               </>
             )}

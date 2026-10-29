@@ -48,7 +48,8 @@ function useInviteParams() {
   return { invited: !!code && isInviteToken(code), email }
 }
 
-export function Login() {
+export function Login({ kind = 'landlord' }: { kind?: 'landlord' | 'tenant' }) {
+  const isTenant = kind === 'tenant'
   const nav = useNavigate()
   const loc = useLocation()
   const { refresh } = useAuth()
@@ -59,13 +60,25 @@ export function Login() {
     setErr(null)
     const { error } = await supabase.auth.signInWithPassword({ email: v.email, password: v.password })
     if (error) return setErr(error.message === 'Invalid login credentials' ? 'Wrong email or password.' : error.message)
+    // Keep landlord and tenant logins separate: check the account type before letting the user in.
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    const { data: mem } = uid ? await supabase.from('organization_members').select('role').eq('user_id', uid).eq('status', 'active') : { data: [] as { role: string }[] | null }
+    const roles = (mem ?? []).map((m) => m.role)
+    const { data: pr } = await supabase.rpc('platform_role')
+    if (roles.length > 0 && !pr) {
+      const hasTenant = roles.includes('tenant')
+      const hasStaff = roles.some((r) => r !== 'tenant')
+      if (isTenant && hasStaff) { await supabase.auth.signOut(); return setErr('This is a landlord account. Please use the landlord login.') }
+      if (!isTenant && hasTenant && !hasStaff) { await supabase.auth.signOut(); return setErr('This is a tenant account. Please use the tenant login.') }
+    }
     await refresh()
     const from = (loc.state as { from?: string } | null)?.from
-    // A pending invitation must be accepted first; otherwise RequireOrg routes tenants to /portal.
-    nav(getPendingInvite() ? '/onboarding' : from && from !== '/login' ? from : '/app', { replace: true })
+    const home = isTenant ? '/portal' : '/app'
+    const own = '/' + (isTenant ? 'tenant-login' : 'login')
+    nav(getPendingInvite() ? '/onboarding' : from && from !== own && from !== '/login' && from !== '/tenant-login' ? from : home, { replace: true })
   })
   return (
-    <Shell title="Log in">
+    <Shell title={isTenant ? 'Tenant login' : 'Landlord login'}>
       <form onSubmit={submit} className="space-y-4" noValidate>
         {invited && <p role="status" className="rounded-lg bg-brand-50 p-3 text-sm text-brand-800">You have an invitation. Log in with the invited email to accept it.</p>}
         {err && <ErrorBox error={err} />}
@@ -74,9 +87,12 @@ export function Login() {
         <Button type="submit" className="w-full" loading={f.formState.isSubmitting}>Log in</Button>
         <div className="flex justify-between text-sm">
           <Link to="/forgot-password" className="font-medium text-brand-700 underline">Forgot password?</Link>
-          <Link to="/signup" className="font-medium text-brand-700 underline">Create account</Link>
+          {isTenant ? <span className="text-slate-500">Ask your landlord for an invite</span> : <Link to="/signup" className="font-medium text-brand-700 underline">Create account</Link>}
         </div>
-        <div className="border-t border-slate-200 pt-4"><p className="mb-2 text-sm font-medium text-slate-700">Just looking around?</p><DemoButtons /></div>
+        <p className="text-center text-sm text-slate-600">
+          {isTenant ? <>Are you a landlord? <Link to="/login" className="font-medium text-brand-700 underline">Landlord login</Link></> : <>Are you a tenant? <Link to="/tenant-login" className="font-medium text-brand-700 underline">Tenant login</Link></>}
+        </p>
+        <div className="border-t border-slate-200 pt-4"><p className="mb-2 text-sm font-medium text-slate-700">Just looking around?</p><DemoButtons only={kind} /></div>
       </form>
     </Shell>
   )

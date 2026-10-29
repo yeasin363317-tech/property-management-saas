@@ -1,7 +1,7 @@
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useAuth } from './AuthProvider'
-import { Spinner, Card, PermissionDenied } from '../components/ui'
+import { Spinner, Card, PermissionDenied, ErrorBox } from '../components/ui'
 import type { OrgRole, PlatformRole } from '../lib/types'
 
 function Full({ children }: { children: ReactNode }) {
@@ -12,7 +12,7 @@ export function RequireAuth() {
   const { session, loading, profile, signOut } = useAuth()
   const loc = useLocation()
   if (loading) return <Spinner label="Loading your session" />
-  if (!session) return <Navigate to="/login" state={{ from: loc.pathname }} replace />
+  if (!session) return <Navigate to={loc.pathname.startsWith('/portal') ? '/tenant-login' : '/login'} state={{ from: loc.pathname }} replace />
   if (profile?.status === 'suspended') {
     return (
       <Full>
@@ -29,7 +29,8 @@ export function RequireAuth() {
 
 /** Landlord workspace: needs at least one membership; tenants are sent to the portal. */
 export function RequireOrg() {
-  const { memberships, role } = useAuth()
+  const { memberships, role, loadError, refresh } = useAuth()
+  if (loadError && !memberships.length) return <Full><ErrorBox error={loadError} onRetry={() => { void refresh() }} /></Full>
   if (!memberships.length) return <Navigate to="/onboarding" replace />
   if (role === 'tenant') return <Navigate to="/portal" replace />
   return <Outlet />
