@@ -85,8 +85,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }).finally(() => {
       if (active) setLoading(false)
     })
-    const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((evt, s) => {
       setSession(s)
+      // Token refreshes keep the same identity and do not change account context.
+      if (evt === 'TOKEN_REFRESHED' && lastUid.current === (s?.user.id ?? null)) return
       // Defer: never call other supabase methods synchronously inside this callback.
       setTimeout(() => { void load(s).catch((error: unknown) => console.error('Auth state refresh failed', error)) }, 0)
     })

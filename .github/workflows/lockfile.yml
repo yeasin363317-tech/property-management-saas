@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['package.json']
+    paths: ['package.json', 'package-lock.json', 'src/**', 'database/**', 'supabase/**', 'ci/**', '.github/workflows/**']
 
 permissions:
   contents: write
@@ -37,23 +37,23 @@ jobs:
       - name: Install from lockfile
         run: npm ci
 
-      - name: Dependency audit (information)
-        run: npm audit --audit-level=high || true
+      - name: Production dependency audit
+        run: npm audit --omit=dev
+
+      - name: High-severity dependency audit
+        run: npm audit --audit-level=high
+
+      - name: Schema parity checks
+        run: ./ci/check-schema-parity.sh
 
       - name: Typecheck
-        id: typecheck
         run: npm run typecheck
-        continue-on-error: true
+
+      - name: Lint
+        run: npm run lint
 
       - name: Unit tests
-        id: tests
         run: npm test
-        continue-on-error: true
 
       - name: Build
         run: npm run build
-
-      - name: Summary
-        run: |
-          echo "typecheck: ${{ steps.typecheck.outcome }}"
-          echo "tests: ${{ steps.tests.outcome }}"

@@ -1,0 +1,18 @@
+erDiagram
+  AUTH_USERS ||--o| PROFILES : has
+  AUTH_USERS ||--o{ ORGANIZATION_MEMBERS : joins
+  ORGANIZATIONS ||--o{ ORGANIZATION_MEMBERS : contains
+  ORGANIZATIONS ||--o{ PROPERTIES : owns
+  PROPERTIES ||--o{ UNITS : contains
+  ORGANIZATIONS ||--o{ TENANTS : registers
+  UNITS ||--o{ LEASES : assigned
+  TENANTS ||--o{ LEASES : signs
+  LEASES ||--o{ RENT_INVOICES : generates
+  RENT_INVOICES ||--o{ PAYMENTS : receives
+  ORGANIZATIONS ||--o{ EXPENSES : records
+  PROPERTIES ||--o{ MAINTENANCE_REQUESTS : has
+  TENANTS ||--o{ MAINTENANCE_REQUESTS : submits
+  ORGANIZATIONS ||--o{ INVITATIONS : issues
+  TENANTS ||--o{ INVITATIONS : targets
+  ORGANIZATIONS ||--o{ DOCUMENTS : stores
+  AUTH_USERS ||--o{ NOTIFICATIONS : receives

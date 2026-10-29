@@ -1,60 +1,70 @@
 # Rentora — Residential Property & Tenant Management
 
-React + TypeScript + Vite + Tailwind frontend, Supabase (Postgres, Auth, RLS, Storage) backend. No custom server.
+Rentora is a React + TypeScript + Vite + Tailwind frontend backed by Supabase (Postgres, Auth, RLS, Storage). It has no custom server. The current package version is **1.1.3**.
+
+## Live demo
+
+Reviewer/demo site: **https://rentora1.vercel.app**
+
+The demo uses fake accounts and sample data only. Do not enable the demo password on a deployment containing real customer data. Use the optional `VITE_DEMO_PASSWORD` only with a unique throwaway password and rotate it through `seed_demo` when needed.
+
+## Five differentiators
+
+1. **Database-enforced workspace isolation:** organization membership and RLS protect tenant data at the database boundary, not only in the UI.
+2. **Role-specific workflows:** owner, property manager, accountant, maintenance staff, and tenant roles have separate operational views.
+3. **Auditable rent corrections:** invoices and payments use RPCs for generation, partial payment, reversal, adjustment, and void flows instead of direct client updates.
+4. **Tenant-ready onboarding:** invitation links can be bound to a tenant record and are checked for email match, expiry, and single use.
+5. **Practical property operations:** leases, rent status, expenses, maintenance, private documents, notifications, exports, and a tenant portal share one workspace model.
 
 ## What is built
-Landing/pricing/FAQ/legal pages, auth (signup, email confirm, login, reset), onboarding, multi-organization workspaces with roles
-(owner, property manager, accountant, maintenance, tenant), properties & units, tenants, leases (overlap protection, renew, end),
-rent invoices (one per lease per month), partial payments, reversals, adjustments, void, expenses, maintenance workflow,
-private documents, in-app notifications, reports with CSV export, team invitations, tenant portal, support tickets,
-and a Super Admin Panel at `/admin` (users, organizations, plans & subscriptions, tickets, flags, jobs, admin roles, audit log).
+
+Landing/pricing/FAQ/legal pages, auth (signup, email confirmation, login, reset), onboarding, multi-organization workspaces with roles (owner, property manager, accountant, maintenance, tenant), properties and units, tenants, leases with overlap protection, rent invoices, partial payments, reversals, adjustments, void, expenses, maintenance workflow, private documents, in-app notifications, reports with CSV export, team invitations, tenant portal, support tickets, and a Super Admin Panel at `/admin`.
+
+## Screenshot and supporting evidence
+
+The repository includes `public/favicon.svg` and a presentation-quality verification summary is delivered as `Rentora_v1.1.3_Repair_Pass.pdf`. Deploy the site to view the responsive UI and dashboard screens. Audit and remediation evidence is documented in `docs/AUDIT_1345_ASSESSMENT.md`, `docs/VERIFICATION_REPORT.md`, and `docs/REMEDIATION_MATRIX.md`.
 
 ## Not built / not claimed
-Online payments, automated billing, email delivery (invitations are shared by link or code), error monitoring, MFA enforcement
-(enable it in Supabase Auth), impersonation (deliberately not implemented). See `docs/AUDIT_READINESS.md`.
+
+Online payments, automated billing, email delivery (invitations are shared by link or code), error monitoring, MFA enforcement (enable it in Supabase Auth), and impersonation are not claimed. See `docs/AUDIT_READINESS.md`.
 
 ## Prerequisites
-Node.js 20 (exact version in `.nvmrc`) and npm 9+ for local builds; a free Supabase project; a static host such as Vercel.
 
-## Deploy (no computer needed beyond a browser)
-1. **Supabase** — on a NEW empty project, run `database/schema.sql` once in the SQL editor (it creates everything). `supabase/migrations/` holds the same schema as ordered files for the Supabase CLI. Do not run both on the same database.
-2. **Supabase Auth settings** (Dashboard → Authentication → URL Configuration): set *Site URL* to your deployed URL and add it under *Redirect URLs*
-   (also add `https://YOUR-DOMAIN/reset-password`). Without this, confirmation and reset emails link to the wrong place.
-3. **Host the frontend** (Vercel/Netlify/Cloudflare Pages): import this folder (push to GitHub first), framework *Vite*,
-   build command `npm run build`, output `dist`.
-4. **Environment variables** on the host: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (use the *publishable/anon* key only, never a secret/service key). Optional: `VITE_DEMO_PASSWORD` for the demo buttons (see Demo accounts).
-5. Open the site, sign up, confirm your email, create your workspace.
+Node.js 20 (exact version in `.nvmrc`) and npm 9+ for local builds; a free Supabase project; and a static host such as Vercel.
 
-## Create the first Super Admin (one time, in the Supabase SQL editor)
-Public signup can never grant admin rights. After you have signed up with your own email, run:
+## Deploy
+
+1. On a **new empty Supabase project**, use `database/schema.sql` once in the SQL editor, then optionally use `database/seed.sql`. The ordered `supabase/migrations/` path is the CLI source of truth; do not run both paths on the same database.
+2. In Supabase Auth URL Configuration, set the Site URL to the deployed URL and add the deployed login and reset-password URLs.
+3. Import this folder into Vercel, choose the Vite preset, use `npm run build`, and publish `dist`.
+4. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` using the publishable/anon key only. `VITE_*` values are public browser settings; never place a `service_role` or secret key in a `VITE_` variable or client bundle.
+5. Open the site, sign up, confirm the email, and create the first workspace.
+
+## First Super Admin
+
+After signing up with your own email, run this once in the Supabase SQL editor:
+
 ```sql
 insert into public.platform_admins (user_id, role)
 select id, 'super_admin' from auth.users where email = 'YOUR-EMAIL@example.com';
 ```
-Then reload the app: an "Admin panel" link appears. Further admins are granted from Admin → Admin roles.
 
-## Dependencies and lockfile
-Commit `package-lock.json` (never git-ignore it) so every install resolves identical versions. Create it with `npm install`, then check with `npm audit`. Use `npm ci` in CI and on the host.
+## Dependencies, tests, and lockfile
 
-## Scripts
-`npm run dev` · `npm run build` · `npm run typecheck` · `npm run lint` · `npm test` (Vitest) · `npm run e2e` (Playwright, needs `npx playwright install`).
+Commit `package-lock.json` and install with `npm ci`. Use `npm audit --omit=dev` for the production dependency check. Available scripts are:
 
-## Database script
-`database/schema.sql` creates the whole database from scratch; `database/seed.sql` adds optional demo data. See HowToSetup.md.
+```text
+npm run dev · npm run build · npm run typecheck · npm run lint · npm test · npm run e2e
+```
 
-## Database tests
-`supabase/tests/*.sql` — run in a **development** project's SQL editor; each ends with an intentional error that rolls everything back and prints a RESULT list of checks.
+Playwright authenticated tests require disposable `E2E_*` Supabase credentials. SQL isolation tests live under `supabase/tests/` and must run only against a development project.
 
-## Daily job (optional scheduling)
-`select public.run_daily_job();` activates/ends leases and creates reminder notifications (deduplicated). Super Admin can run it from Admin → Operations.
-To schedule: enable the `pg_cron` extension, then `select cron.schedule('rentora-daily', '0 2 * * *', 'select public.run_daily_job()');`.
+## Demo accounts
 
-## Demo accounts (for customers and reviewers to look around)
-Order matters: run `database/schema.sql` first (step 1 above), then `database/seed.sql`, then call `seed_demo(...)`.
-`database/seed.sql` creates two fake accounts with sample data (2 properties, 6 units, 4 tenants, leases, invoices that are paid / partial / overdue, expenses, maintenance requests):
-- Landlord: `demo.landlord@example.com`
-- Tenant portal: `demo.tenant@example.com`
+Run `database/schema.sql`, optionally `database/seed.sql`, and then `select public.seed_demo('your-12-plus-char-password');`. The two fake accounts are `demo.landlord@example.com` and `demo.tenant@example.com`. The password is not stored in this repository; if the demo buttons are enabled, the same unique throwaway value is supplied as `VITE_DEMO_PASSWORD` and is necessarily visible in the public browser bundle. Demo accounts cannot create organizations or become platform admins.
 
-The password is **not stored in this repository**. You choose it: run `select public.seed_demo('your-12-plus-char-password');` in the SQL editor, then set the same value as the `VITE_DEMO_PASSWORD` environment variable on your host and redeploy. The landing page and login page then show **Try demo as landlord / tenant** buttons that sign in with one click (no password typing).
-Reset the demo any time with the same `select public.seed_demo(...)` call. Demo accounts cannot change their credentials, cannot create organizations and are not platform admins. Files uploaded by demo users must be removed from Storage manually (SQL cannot delete storage objects).
-To remove the demo entirely: delete the two users in Supabase Auth and the organization "Demo Properties (sample data)".
+## License
+
+This repository includes `LICENSE-NOTE.md`. The application source is provided for the authorized Rentora project and is not represented as an open-source license grant unless a separate license is supplied by the project owner. Third-party packages retain their own licenses.
+
+More detail is available in `HowToSetup.md`, `docs/DEPLOYMENT.md`, `docs/SECURITY.md`, `docs/RLS_POLICY_MATRIX.md`, and `docs/AUDIT_1345_ASSESSMENT.md`.
