@@ -22,11 +22,13 @@ jobs:
             echo "rentora.zip repo-r root-e nai!"; exit 1
           fi
           unzip -q -o rentora.zip -d _unzipped
-          # zip-er vitore "rentora/" folder ache - setar content root-e anbo
+          # zip-er vitore "rentora/" folder ache - setar content root-e anbo.
+          # Preserve repository workflows: GITHUB_TOKEN cannot push workflow changes
+          # without the separate `workflows` permission.
           if [ -d _unzipped/rentora ]; then
-            cp -a _unzipped/rentora/. .
+            (cd _unzipped/rentora && tar --exclude='.github' -cf - .) | tar -xf - -C .
           else
-            cp -a _unzipped/. .
+            (cd _unzipped && tar --exclude='.github' -cf - .) | tar -xf - -C .
           fi
           rm -rf _unzipped rentora.zip
           rm -rf __MACOSX
